@@ -1,4 +1,6 @@
 using TravelService from '../../srv/travel-service';
+using from '../../db/schema';
+using from '../../db/master-data';
 
 //
 // annotatios that control the fiori layout
@@ -84,6 +86,11 @@ annotate TravelService.Travel with @UI: {
             $Type : 'UI.DataFieldForAnnotation',
             Target : '@UI.DataPoint#Progress',
             Label : '{i18n>ProgressOfTravel}',
+        },
+        {
+            $Type : 'UI.DataFieldForAnnotation',
+            Target : 'to_Agency/@Communication.Contact#contact',
+            Label : 'Contact Name',
         }
     ],
     Facets                : [
@@ -154,7 +161,12 @@ annotate TravelService.Booking with @UI: {
         },
         {Value: FlightDate},
         {Value: FlightPrice},
-        {Value: BookingStatus_code}
+        {Value: BookingStatus_code},
+        {
+            $Type : 'UI.DataFieldForAnnotation',
+            Target : '@UI.Chart#TotalSupplPrice',
+            Label : '{i18n>Supplements}',
+        }
     ],
     Facets                        : [
         {
@@ -237,5 +249,48 @@ annotate TravelService.Travel with @(
         Value : Progress,
         Visualization : #Progress,
         TargetValue : 100,
+    }
+);
+annotate TravelService.Booking with @(
+    UI.DataPoint #TotalSupplPrice : {
+        Value : TotalSupplPrice,
+        MinimumValue : 0,
+        MaximumValue : 120,
+    },
+    UI.Chart #TotalSupplPrice : {
+        ChartType : #Bullet,
+        Measures : [
+            TotalSupplPrice,
+        ],
+        MeasureAttributes : [
+            {
+                DataPoint : '@UI.DataPoint#TotalSupplPrice',
+                Role : #Axis1,
+                Measure : TotalSupplPrice,
+            },
+        ],
+    }
+);
+annotate TravelService.TravelAgency with @(
+    Communication.Contact #contact : {
+        $Type : 'Communication.ContactType',
+        fn : Name,
+        tel : [
+            {
+                $Type : 'Communication.PhoneNumberType',
+                type : #work,
+                uri : PhoneNumber,
+            },
+        ],
+        adr : [
+            {
+                $Type : 'Communication.AddressType',
+                type : #work,
+                street : Street,
+                locality : City,
+                code : PostalCode,
+                country : CountryCode_code,
+            },
+        ],
     }
 );
