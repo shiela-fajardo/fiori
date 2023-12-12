@@ -46,7 +46,7 @@ annotate TravelService.Travel with @UI: {
         to_Customer_CustomerID,
         TravelStatus_code,
         BeginDate,
-        EndDate,
+        EndDate
     ],
     LineItem              : [
         {
@@ -79,18 +79,18 @@ annotate TravelService.Travel with @UI: {
         },
         {
             $Type : 'UI.DataFieldForAction',
-            Action : 'TravelService.deductDiscount',
+            Action: 'TravelService.deductDiscount',
             Label : '{i18n>DeductDiscount}',
         },
         {
             $Type : 'UI.DataFieldForAnnotation',
-            Target : '@UI.DataPoint#Progress',
+            Target: '@UI.DataPoint#Progress',
             Label : '{i18n>ProgressOfTravel}',
         },
         {
             $Type : 'UI.DataFieldForAnnotation',
-            Target : 'to_Agency/@Communication.Contact#contact',
-            Label : 'Contact Name',
+            Target: 'to_Agency/@Communication.Contact#contact',
+            Label : 'Agency',
         }
     ],
     Facets                : [
@@ -164,7 +164,7 @@ annotate TravelService.Booking with @UI: {
         {Value: BookingStatus_code},
         {
             $Type : 'UI.DataFieldForAnnotation',
-            Target : '@UI.Chart#TotalSupplPrice',
+            Target: '@UI.Chart#TotalSupplPrice',
             Label : '{i18n>Supplements}',
         }
     ],
@@ -244,58 +244,58 @@ SortOrder: [{
     Property  : FlightDate,
     Descending: true
 }]}};
-annotate TravelService.Travel with @(
-    UI.DataPoint #Progress : {
-        Value : Progress,
-        Visualization : #Progress,
-        TargetValue : 100,
-    }
-);
+
+annotate TravelService.Travel with @(UI.DataPoint #Progress: {
+    Value        : Progress,
+    Visualization: #Progress,
+    TargetValue  : 100,
+});
+
 annotate TravelService.Booking with @(
-    UI.DataPoint #TotalSupplPrice : {
-        Value : TotalSupplPrice,
-        MinimumValue : 0,
-        MaximumValue : 120,
+    UI.DataPoint #TotalSupplPrice: {
+        Value                 : TotalSupplPrice,
+        MinimumValue          : 0,
+        MaximumValue          : 120,
+        TargetValue           : 100,
+        Visualization         : #BulletChart,
+        //  Criticality : TotalSupplPrice, // it has precedence over criticalityCalculation => in order to have the criticality color do not use it
+        CriticalityCalculation: {
+            $Type                 : 'UI.CriticalityCalculationType',
+            ImprovementDirection  : #Maximize,
+            DeviationRangeLowValue: 20,
+            ToleranceRangeLowValue: 75
+        }
     },
-    UI.Chart #TotalSupplPrice : {
-        ChartType : #Bullet,
-        Measures : [
-            TotalSupplPrice,
-        ],
-        MeasureAttributes : [
-            {
-                DataPoint : '@UI.DataPoint#TotalSupplPrice',
-                Role : #Axis1,
-                Measure : TotalSupplPrice,
-            },
-        ],
-    }
-);
-annotate TravelService.TravelAgency with @(
-    Communication.Contact #contact : {
-        $Type : 'Communication.ContactType',
-        fn : Name,
-        tel : [
-            {
-                $Type : 'Communication.PhoneNumberType',
-                type : #work,
-                uri : PhoneNumber,
-            },
-        ],
-        adr : [
-            {
-                $Type : 'Communication.AddressType',
-                type : #work,
-                street : Street,
-                locality : City,
-                code : PostalCode,
-                country : CountryCode_code,
-            },
-        ],
+    UI.Chart #TotalSupplPrice    : {
+        ChartType        : #Bullet,
+        Title            : 'total supplements',
+        AxisScaling      : {$Type: 'UI.ChartAxisScalingType', },
+        Measures         : [TotalSupplPrice, ],
+        MeasureAttributes: [{
+            DataPoint: '@UI.DataPoint#TotalSupplPrice',
+            Role     : #Axis1,
+            Measure  : TotalSupplPrice,
+        }, ],
     }
 );
 
-
+annotate TravelService.TravelAgency with @(Communication.Contact #contact: {
+    $Type: 'Communication.ContactType',
+    fn   : Name,
+    tel  : [{
+        $Type: 'Communication.PhoneNumberType',
+        type : #work,
+        uri  : PhoneNumber,
+    }, ],
+    adr  : [{
+        $Type   : 'Communication.AddressType',
+        type    : #work,
+        street  : Street,
+        locality: City,
+        code    : PostalCode,
+        country : CountryCode_code,
+    }, ],
+});
 
 annotate TravelService.Travel with @UI: {
     SelectionVariant #canceled: {
@@ -356,3 +356,111 @@ annotate TravelService.Travel with @UI: {
         }, ],
     }
 };
+
+annotate TravelService.Travel with @(
+    UI.SelectionPresentationVariant #tableView : {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        PresentationVariant: ![@UI.PresentationVariant],
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [{
+                $Type       : 'UI.SelectOptionType',
+                PropertyName: TravelStatus_code,
+                Ranges      : [{
+                    $Type : 'UI.SelectionRangeType',
+                    Sign  : #I,
+                    Option: #EQ,
+                    Low   : 'O',
+                }, ],
+            }],
+        },
+        Text               : '{i18n>Open}',
+    },
+    UI.LineItem #tableView : [
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'TravelService.rejectTravel',
+            Label : 'rejectTravel',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : Description,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : LastChangedAt,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : TravelID,
+            Label : 'TravelID',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : to_Customer_CustomerID,
+        },],
+     UI.SelectionPresentationVariant #tableView1: {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        PresentationVariant: {
+            $Type         : 'UI.PresentationVariantType',
+            Visualizations: ['@UI.LineItem#tableView', ],
+        },
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [{
+                $Type       : 'UI.SelectOptionType',
+                PropertyName: TravelStatus_code,
+                Ranges      : [{
+                    $Type : 'UI.SelectionRangeType',
+                    Sign  : #I,
+                    Option: #EQ,
+                    Low   : 'A',
+                }, ],
+            }],
+        },
+        Text               : '{i18n>Accepted}',
+    }
+);
+annotate TravelService.Travel with @(
+    UI.LineItem #tableView1 : [
+        {
+            $Type : 'UI.DataField',
+            Value : Description,
+        },{
+            $Type : 'UI.DataField',
+            Value : LastChangedAt,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : TravelID,
+            Label : 'TravelID',
+        },{
+            $Type : 'UI.DataField',
+            Value : to_Agency_AgencyID,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : to_Customer_CustomerID,
+        },],
+     UI.SelectionPresentationVariant #tableView2: {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        PresentationVariant: {
+            $Type         : 'UI.PresentationVariantType',
+            Visualizations: ['@UI.LineItem#tableView1', ],
+        },
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [{
+                $Type       : 'UI.SelectOptionType',
+                PropertyName: TravelStatus_code,
+                Ranges      : [{
+                    $Type : 'UI.SelectionRangeType',
+                    Sign  : #I,
+                    Option: #EQ,
+                    Low   : 'X',
+                }, ],
+            }],
+        },
+        Text               : '{i18n>Canceled}',
+    }
+);
