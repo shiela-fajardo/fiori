@@ -18,6 +18,11 @@ annotate TravelService.Travel with @UI: {
             $Type : 'UI.DataFieldForAction',
             Action: 'TravelService.rejectTravel',
             Label : '{i18n>RejectTravel}'
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'TravelService.deductDiscount',
+            Label : '{i18n>DeductDiscount}t',
         }
     ],
     HeaderInfo            : {
@@ -462,5 +467,33 @@ annotate TravelService.Travel with @(
             }],
         },
         Text               : '{i18n>Canceled}',
+    }
+);
+
+annotate TravelService.Travel with @(
+    UI.DataPoint #TravelStatus_code : {
+        $Type : 'UI.DataPointType',
+        Value : TravelStatus_code,
+        Title : 'Travel Status',
+        Criticality : TravelStatus.criticality,
+    },
+    UI.HeaderFacets : [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'TravelStatus_code',
+            Target : '@UI.DataPoint#TravelStatus_code',
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'TotalPrice',
+            Target : '@UI.DataPoint#TotalPrice',
+        },
+    ]
+);
+annotate TravelService.Travel with @(
+    UI.DataPoint #TotalPrice : {
+        $Type : 'UI.DataPointType',
+        Value : TotalPrice,
+        Title : '{i18n>TotalPrice}',
     }
 );
