@@ -108,7 +108,14 @@ annotate TravelService.Travel with @UI: {
                 ID    : 'TravelData',
                 Target: '@UI.FieldGroup#TravelData',
                 Label : '{i18n>GeneralInformation}'
-            }]
+            },
+                {
+                    $Type : 'UI.ReferenceFacet',
+                    Label : '{i18n>TravelAdministrativeData}',
+                    ID : 'TravelAdministrativeData',
+                    Target : '@UI.FieldGroup#TravelAdministrativeData',
+                    ![@UI.PartOfPreview] : false,
+                }]
         },
         { // booking list
             $Type : 'UI.ReferenceFacet',
@@ -555,3 +562,24 @@ annotate TravelService.Travel with {
     Description @UI.MultiLineText : true
                 @UI.Placeholder  : '{i18n>DescrPlcehlder}'
 };
+annotate TravelService.Travel with @(
+    UI.FieldGroup #TravelAdministrativeData : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            {
+                $Type : 'UI.DataField',
+                Value : createdAt,
+            },{
+                $Type : 'UI.DataField',
+                Value : createdBy,
+            },{
+                $Type : 'UI.DataField',
+                Value : LastChangedAt,
+            },],
+    }
+);
+
+annotate TravelService.Travel @(Common.SideEffects #ReactonItemCreationOrDeletion: {
+    SourceEntities  : [to_Booking],
+    TargetProperties: ['TotalPrice']
+});
